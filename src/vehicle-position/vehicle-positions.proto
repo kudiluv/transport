@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+message VehiclePositionResponse {
+  repeated VehiclePosition vehiclePositions = 1;
+}
+
+message VehiclePosition {
+  int32 id = 1;
+  PointMessage position = 2;
+  int32 speed = 3;
+  Vehicle vehicle = 4;
+  int32 rotation = 5;
+  string route_position = 6;
+}
+
+message Vehicle {
+  int32 id = 1;
+  string vehicleId = 2;
+  Route route = 3;
+}
+
+message Route {
+  int32 id = 1;
+  string type = 2;
+  string routeNum = 3;
+  string ABName = 4;
+  string BAName = 5;
+}
+
+message PointMessage {
+  string type = 1;
+  repeated float coordinates = 2;
+}
+
+enum RoutePosition {
+  IDLE = 1;
+  AB = 2;
+  BA = 3;
+}
+
+enum RouteType {
+  bus = 1;
+  trol = 2;
+  tram = 3;
+  suburbanbus = 4;
+  train = 5;
+}
