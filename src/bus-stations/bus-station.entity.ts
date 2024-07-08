@@ -1,5 +1,5 @@
 import { Route } from 'src/routes/route.entity';
-import { Column, Entity, Point, PrimaryColumn } from 'typeorm';
+import { Column, Entity, ManyToMany, Point, PrimaryColumn } from 'typeorm';
 
 @Entity()
 export class BusStation {
@@ -12,5 +12,9 @@ export class BusStation {
   @Column()
   name: string;
 
-  routes?: Route[];
+  @ManyToMany(() => Route, (route) => route.ABStations)
+  routesAB?: Route[];
+
+  @ManyToMany(() => Route, (route) => route.BAStations)
+  routesBA?: Route[];
 }

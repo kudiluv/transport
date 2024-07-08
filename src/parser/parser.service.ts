@@ -1,5 +1,4 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ParsedVehiclePositionDto } from '../pikas/dto/parsed-vehicle-position.dto';
 import { RouteParserService } from '../routes/route-parser.service';
 import { firstValueFrom, shareReplay, switchMap, timer } from 'rxjs';
 import { BusStationsParserService } from 'src/bus-stations/bus-stations-parser.service';
@@ -7,6 +6,7 @@ import { LogPerfomance } from 'src/shared/decorators/log-pefomance';
 import { VehicleParserService } from 'src/vehicle/vehicle-parser.service';
 import { VehiclePositionParserService } from 'src/vehicle-position/verhicle-position-parser.service';
 import { PikasService } from 'src/pikas/pikas.service';
+
 /**
  * 1. Парсинг остановок:
  * 1.1 Получить информацию о существующих остановках
@@ -36,7 +36,7 @@ export class ParserService {
       } catch (error) {
         console.log(error);
       }
-    }, 5000);
+    }, 40000);
   }
 
   @LogPerfomance({

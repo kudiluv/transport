@@ -30,24 +30,6 @@ export class RoutesService {
     });
   }
 
-  @Transactional()
-  public async create(
-    createDto: RouteCreateDto,
-    entityManager?: EntityManager,
-  ) {
-    const route = this.routeRepository.create({
-      type: createDto.type,
-      routeNum: createDto.routeNum,
-      AB: createDto.AB,
-      BA: createDto.BA,
-      ABName: createDto.ABName,
-      BAName: createDto.BAName,
-      ABStations: createDto.ABStations,
-      BAStations: createDto.BAStations,
-    });
-    return entityManager.save(route);
-  }
-
   public async getRoutePath(id: number) {
     const route = await this.routeRepository.findOne({
       where: { id },
@@ -86,24 +68,14 @@ export class RoutesService {
   public async getRouteDetail(id: number) {
     const data = await this.routeRepository
       .createQueryBuilder('route')
-      .leftJoinAndMapMany(
-        'route.ABStationsEntities',
-        BusStation,
-        'busStation',
-        'busStation.id = ANY(route.ABStations)',
-      )
-      .leftJoinAndMapMany(
-        'route.BAStationsEntities',
-        BusStation,
-        'busStationBA',
-        'busStationBA.id = ANY(route.BAStations)',
-      )
+      .leftJoinAndSelect('route.ABStations', 'abStations')
+      .leftJoinAndSelect('route.BAStations', 'baStations')
       .addSelect(
-        'ST_LineLocatePoint(route.AB, busStation.position)',
+        'ST_LineLocatePoint(route.AB, abStations.position)',
         'fraction',
       )
       .addSelect(
-        'ST_LineLocatePoint(route.BA, busStationBA.position)',
+        'ST_LineLocatePoint(route.BA, baStations.position)',
         'fraction_ba',
       )
       .orderBy('fraction')

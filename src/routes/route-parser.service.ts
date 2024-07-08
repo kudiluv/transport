@@ -32,6 +32,13 @@ export class RouteParserService {
       .addSelect('route.BA')
       .getMany();
 
+    const busStationsMap = new Map([
+      ...busStations.map((station): [string, BusStation] => [
+        station.id,
+        station,
+      ]),
+    ]);
+
     const routesForCreating = await parsedRoutes.filter(
       ({ routeNum, type }) => {
         return !existedRoutes.some(
@@ -52,13 +59,28 @@ export class RouteParserService {
         BA: routePaths.BA,
         ABName: route.abName,
         BAName: route.baName,
-        ABStations: route.ABStations,
-        BAStations: route.BAStations,
+        ABStations: this.getStations(route.ABStations, busStationsMap),
+        BAStations: this.getStations(route.BAStations, busStationsMap),
       });
       const savedRoute = await this.routeRepository.save(routeEntity);
       existedRoutes.push(savedRoute);
     }
 
     return existedRoutes;
+  }
+
+  private getStations(
+    newStations: string[],
+    existStations: Map<string, BusStation>,
+  ) {
+    const busStations: BusStation[] = [];
+    for (const stationId of newStations) {
+      const station = existStations.get(stationId);
+      if (station) {
+        busStations.push(station);
+      }
+    }
+
+    return busStations;
   }
 }

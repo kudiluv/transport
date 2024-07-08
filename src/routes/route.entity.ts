@@ -2,7 +2,9 @@ import { Vehicle } from 'src/vehicle/vehicle.entity';
 import {
   Column,
   Entity,
+  JoinTable,
   LineString,
+  ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -35,15 +37,13 @@ export class Route {
   @Column()
   BAName: string;
 
-  @Column('varchar', { array: true, select: false })
-  ABStations: string[];
+  @ManyToMany(() => BusStation, (station) => station.routesAB)
+  @JoinTable()
+  ABStations: BusStation[];
 
-  ABStationsEntities?: BusStation[];
-
-  @Column('varchar', { array: true, select: false })
-  BAStations: string[];
-
-  BAStationsEntities: BusStation[];
+  @ManyToMany(() => BusStation, (station) => station.routesBA)
+  @JoinTable()
+  BAStations: BusStation[];
 
   @OneToMany(() => Vehicle, (vehicle) => vehicle.route)
   vehicles: Vehicle[];
