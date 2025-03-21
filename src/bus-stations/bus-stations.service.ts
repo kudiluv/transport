@@ -1,41 +1,28 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Repository } from 'typeorm';
-import { BusStation } from './bus-station.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Route } from 'src/routes/route.entity';
 import { BusStationDetails } from './dto/bus-station-details';
+import { BusStation } from './bus-station.entity';
+import { BusStationCreateParams } from './types/bus-station-create-params.type';
+import { LogPerformance } from 'shared/decorators/log-pefomance';
 
 @Injectable()
 export class BusStationsService {
-  constructor(
-    @InjectRepository(BusStation)
-    private busStationsRepository: Repository<BusStation>,
-  ) {}
+    constructor(
+        @InjectRepository(BusStation)
+        private busStationsRepository: Repository<BusStation>,
+    ) {}
 
-  public async get() {
-    const data = await this.busStationsRepository
-      .createQueryBuilder('busStation')
-      .getMany();
-    return data;
-  }
-
-  public async getById(id: string): Promise<BusStationDetails> {
-    const busStation = await this.busStationsRepository
-      .createQueryBuilder('busStation')
-      .leftJoinAndSelect('busStation.routesAB', 'routesAB')
-      .leftJoinAndSelect('busStation.routesBA', 'routesBA')
-      .where('busStation.id = :id', { id })
-      .getOne();
-
-    if (!busStation) {
-      throw new NotFoundException('Bus station not found');
+    public async getAll() {
+        const data = await this.busStationsRepository.createQueryBuilder('busStation').getMany();
+        return data;
     }
 
-    return {
-      id: busStation.id,
-      name: busStation.name,
-      position: busStation.position,
-      routes: [...busStation.routesAB, ...busStation.routesBA],
-    };
-  }
+    public upsert(params: BusStationCreateParams) {
+        return this.busStationsRepository.save({
+            id: params.id,
+            name: params.name,
+            coordinates: params.coordinates,
+        });
+    }
 }

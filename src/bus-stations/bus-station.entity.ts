@@ -1,20 +1,18 @@
-import { Route } from 'src/routes/route.entity';
-import { Column, Entity, ManyToMany, Point, PrimaryColumn } from 'typeorm';
+import { GeometryColumn, StringColumn } from 'common/decorators/db-decorators';
+import { RouteDirection } from 'route-direction/route-direction.entity';
+import { Entity, ManyToMany, Point, PrimaryColumn } from 'typeorm';
 
 @Entity()
 export class BusStation {
-  @PrimaryColumn()
-  id: string;
+    @PrimaryColumn()
+    id: string;
 
-  @Column('geometry')
-  position: Point;
+    @GeometryColumn('Coordinates of bus station')
+    coordinates: Point;
 
-  @Column()
-  name: string;
+    @StringColumn('Name of bus station')
+    name: string;
 
-  @ManyToMany(() => Route, (route) => route.ABStations)
-  routesAB?: Route[];
-
-  @ManyToMany(() => Route, (route) => route.BAStations)
-  routesBA?: Route[];
+    @ManyToMany(() => RouteDirection, (route) => route.busStations)
+    routeDirections?: RouteDirection[];
 }

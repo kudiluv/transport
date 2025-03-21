@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
-import { TensorService } from './tensor.service';
+// import { TensorService } from './tensor.service';
 
 @Module({
-  providers: [TensorService],
+    // providers: [TensorService],
 })
 export class TensorModule {}

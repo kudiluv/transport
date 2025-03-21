@@ -1,6 +1,6 @@
-import { Route } from 'src/routes/route.entity';
+import { Route } from 'routes/route.entity';
 
 export class VehicleFindCreateDto {
-  route: Route;
-  vehicleId: string;
+    route: Route;
+    vehicleId: string;
 }

@@ -1,50 +1,23 @@
-import { Vehicle } from 'src/vehicle/vehicle.entity';
-import {
-  Column,
-  Entity,
-  JoinTable,
-  LineString,
-  ManyToMany,
-  OneToMany,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
-import { RouteType } from './enums/RouteType';
-import { BusStation } from 'src/bus-stations/bus-station.entity';
+import { Column, Entity, Index, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { RouteType } from './enums/route-type.enum';
+import { StringColumn } from 'common/decorators/db-decorators';
+import { RouteDirection } from '../route-direction/route-direction.entity';
 
 @Entity()
 export class Route {
-  @PrimaryGeneratedColumn()
-  id: number;
+    @PrimaryGeneratedColumn()
+    id: number;
 
-  @Column({
-    type: 'enum',
-    enum: RouteType,
-  })
-  type: RouteType;
+    @Index()
+    @Column({
+        comment: 'Number of route',
+    })
+    num: string;
 
-  @Column()
-  routeNum: string;
+    @Index()
+    @StringColumn('Type of route')
+    type: RouteType;
 
-  @Column('geometry', { nullable: true, select: false })
-  AB: LineString;
-
-  @Column('geometry', { nullable: true, select: false })
-  BA: LineString;
-
-  @Column()
-  ABName: string;
-
-  @Column()
-  BAName: string;
-
-  @ManyToMany(() => BusStation, (station) => station.routesAB)
-  @JoinTable()
-  ABStations: BusStation[];
-
-  @ManyToMany(() => BusStation, (station) => station.routesBA)
-  @JoinTable()
-  BAStations: BusStation[];
-
-  @OneToMany(() => Vehicle, (vehicle) => vehicle.route)
-  vehicles: Vehicle[];
+    @OneToMany(() => RouteDirection, (direction) => direction.route)
+    directions: RouteDirection[];
 }

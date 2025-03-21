@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+message BusStationsResponse {
+  repeated BusStation busStations = 1;
+}
+
+message BusStation {
+  int32 id = 1;
+  repeated float coordinates = 2;
+  string name = 3;
+}

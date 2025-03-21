@@ -1,37 +1,51 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Transactional } from 'src/shared/decorators/transactional';
-import { EntityManager, Repository } from 'typeorm';
-import { VehicleFindCreateDto } from './dto/vehicle-find-create.dto';
+import { VehicleCreateParams } from './types/vehicle-create-params.type';
+import { Transactional, TransactionHost } from '@nestjs-cls/transactional';
+import { TransactionalAdapterTypeOrm } from '@nestjs-cls/transactional-adapter-typeorm';
 import { Vehicle } from './vehicle.entity';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class VehicleService {
-  constructor(
-    @InjectRepository(Vehicle)
-    private vehicleRepository: Repository<Vehicle>,
-  ) {}
+    constructor(
+        private readonly txHost: TransactionHost<TransactionalAdapterTypeOrm>,
+        @InjectRepository(Vehicle) private readonly vehicleRepository: Repository<Vehicle>,
+    ) {}
 
-  @Transactional()
-  public async findOrCreate(
-    dto: VehicleFindCreateDto,
-    manager?: EntityManager,
-  ): Promise<Vehicle> {
-    const vehicle = await manager.findOne(Vehicle, {
-      where: {
-        route: dto.route,
-        vehicleId: dto.vehicleId,
-      },
-      relations: ['route'],
-    });
-
-    if (vehicle) {
-      return vehicle;
+    private get txRepository() {
+        return this.txHost.tx.getRepository(Vehicle);
     }
-    const newVehicle = this.vehicleRepository.create({
-      route: dto.route,
-      vehicleId: dto.vehicleId,
-    });
-    return manager.save(newVehicle);
-  }
+
+    public getAll() {
+        return this.vehicleRepository.find();
+    }
+
+    @Transactional()
+    public async findOrCreate(dto: VehicleCreateParams): Promise<Vehicle> {
+        const vehicle = await this.txRepository.findOne({
+            where: {
+                regNumber: dto.regNumber,
+            },
+        });
+
+        if (vehicle) {
+            return vehicle;
+        }
+
+        const newVehicle = this.txRepository.create({
+            regNumber: dto.regNumber,
+        });
+
+        return this.txRepository.save(newVehicle);
+    }
+
+    @Transactional()
+    public async create(dto: VehicleCreateParams): Promise<Vehicle> {
+        const newVehicle = this.txRepository.create({
+            regNumber: dto.regNumber,
+        });
+
+        return this.txRepository.save(newVehicle);
+    }
 }

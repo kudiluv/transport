@@ -1,35 +1,27 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import { HistoryTimestamp } from './history-timestamp.entity';
-import { DataSource, EntityManager, Repository } from 'typeorm';
+import { Transactional, TransactionHost } from '@nestjs-cls/transactional';
+import { TransactionalAdapterTypeOrm } from '@nestjs-cls/transactional-adapter-typeorm';
 
 @Injectable()
 export class HistoryTimestampService {
-  constructor(
-    @InjectRepository(HistoryTimestamp)
-    private historyTimestampRepository: Repository<HistoryTimestamp>,
-    private dataSource: DataSource,
-  ) {}
+    constructor(private readonly txHost: TransactionHost<TransactionalAdapterTypeOrm>) {}
 
-  public createWithManager(manager: EntityManager): Promise<HistoryTimestamp> {
-    const historyTimestamp = this.historyTimestampRepository.create();
-    return manager.save(historyTimestamp);
-  }
-
-  public create(manager?: EntityManager) {
-    if (manager) {
-      return this.createWithManager(manager);
+    private get txRepository() {
+        return this.txHost.tx.getRepository(HistoryTimestamp);
     }
-    return this.dataSource.transaction(async (m) => {
-      return this.createWithManager(m);
-    });
-  }
 
-  public async getLast(): Promise<HistoryTimestamp> {
-    const max = await this.historyTimestampRepository.maximum('id');
-    return this.historyTimestampRepository
-      .createQueryBuilder('timestamp')
-      .where('id = :max', { max })
-      .getOne();
-  }
+    @Transactional()
+    public async getOrCreateLast(): Promise<HistoryTimestamp> {
+        const max = await this.txRepository.maximum('id');
+        if (!max) {
+            return this.txRepository.save(this.txRepository.create());
+        }
+
+        return (await this.txRepository.createQueryBuilder('timestamp').where('id = :max', { max }).getOne())!;
+    }
+
+    public async create() {
+        return this.txRepository.save(this.txRepository.create());
+    }
 }

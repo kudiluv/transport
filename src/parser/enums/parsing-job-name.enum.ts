@@ -1,0 +1,5 @@
+export enum ParsingJobName {
+    BUS_STATIONS = 'BUS_STATIONS',
+    ROUTE = 'ROUTE',
+    VEHICLE_POSITIONS = 'VEHICLE_POSITIONS',
+}

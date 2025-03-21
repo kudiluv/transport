@@ -1,19 +1,15 @@
-import { VehiclePosition } from 'src/vehicle-position/vehicle-position.entity';
-import {
-  CreateDateColumn,
-  Entity,
-  OneToMany,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { CreateDateColumn, Entity, Index, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { VehiclePosition } from '../vehicle-position/vehicle-position.entity';
 
 @Entity()
 export class HistoryTimestamp {
-  @PrimaryGeneratedColumn()
-  id: number;
+    @PrimaryGeneratedColumn()
+    id: number;
 
-  @CreateDateColumn()
-  date: Date;
+    @Index()
+    @CreateDateColumn()
+    date: Date;
 
-  @OneToMany(() => VehiclePosition, (position) => position.historyTimestamp)
-  vehiclePosition: VehiclePosition;
+    @OneToMany(() => VehiclePosition, (position) => position.historyTimestamp)
+    vehiclePositions: VehiclePosition[];
 }

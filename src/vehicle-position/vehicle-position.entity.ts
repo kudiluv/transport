@@ -1,40 +1,29 @@
-import { HistoryTimestamp } from 'src/history-timestamp/history-timestamp.entity';
-import { Vehicle } from 'src/vehicle/vehicle.entity';
-import {
-  Column,
-  Entity,
-  Index,
-  ManyToOne,
-  Point,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
-import { RoutePosition } from './enum/route-position';
+import { GeometryColumn, IntColumn } from 'common/decorators/db-decorators';
+import { Entity, ManyToOne, Point, PrimaryGeneratedColumn } from 'typeorm';
+import { RouteDirection } from '../route-direction/route-direction.entity';
+import { HistoryTimestamp } from '../history-timestamp/history-timestamp.entity';
+import { Vehicle } from '../vehicle/vehicle.entity';
 
 @Entity()
 export class VehiclePosition {
-  @PrimaryGeneratedColumn()
-  id: number;
+    @PrimaryGeneratedColumn()
+    id: number;
 
-  @Column({ type: 'geometry' })
-  position: Point;
+    @GeometryColumn('Coordinates of vehicle')
+    coordinates: Point;
 
-  @Column()
-  speed: number;
+    @IntColumn('Speed of vehicle')
+    speed: number;
 
-  @ManyToOne(() => Vehicle, (vehicle) => vehicle.positions)
-  vehicle: Vehicle;
+    @IntColumn('Rotation of vehicle')
+    rotation: number;
 
-  @Index('history_timestamp_id')
-  @ManyToOne(() => HistoryTimestamp, (historyTimestamp) => historyTimestamp)
-  historyTimestamp: HistoryTimestamp;
+    @ManyToOne(() => RouteDirection, (routeDirection) => routeDirection.vehiclePositions)
+    routeDirection: RouteDirection | null;
 
-  @Column()
-  rotation: number;
+    @ManyToOne(() => Vehicle, (vehicle) => vehicle.positions)
+    vehicle: Vehicle;
 
-  @Index('prev_position_id')
-  @ManyToOne(() => VehiclePosition, { nullable: true })
-  prevPosition: VehiclePosition;
-
-  @Column({ type: 'enum', enum: RoutePosition, default: RoutePosition.IDLE })
-  route_position: RoutePosition;
+    @ManyToOne(() => HistoryTimestamp, (historyTimestamp) => historyTimestamp.vehiclePositions)
+    historyTimestamp: HistoryTimestamp;
 }
